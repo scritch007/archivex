@@ -83,24 +83,12 @@ func (a *Archiver) Add(name string) error {
 			// Set the header's name to what we want--it may not include the top folder
 			header.Name = zipPath + "/"
 
+			a.log(fmt.Sprintf("Adding folder %s header as %s\n", path, zipPath))
 			// Get a writer in the archive based on our header
 			_, err = a.w.CreateHeader(header)
 			return err
 		}
-
-		ze, err := a.w.Create(zipPath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot create zip entry <%s>: %s\n", zipPath, err)
-			return err
-		}
-		file, err := os.Open(path)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Cannot open file <%s>: %s\n", path, err)
-			return err
-		}
-		defer file.Close()
-		io.Copy(ze, file)
-		return nil
+		return a.addFile(path)
 	})
 	return nil
 }
